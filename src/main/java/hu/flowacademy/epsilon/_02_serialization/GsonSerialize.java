@@ -2,6 +2,9 @@ package hu.flowacademy.epsilon._02_serialization;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.stream.JsonReader;
+import java.io.StringReader;
 
 public class GsonSerialize {
     public static void main(String[] args) {
@@ -12,9 +15,10 @@ public class GsonSerialize {
         dir.add("Brandon", new PhoneNumber("1", "415", "7153487"));
 
         var gson = new GsonBuilder().setPrettyPrinting().create();
-        var x = gson.toJson(dir);
-        System.out.println(x);
-        var dir2 = gson.fromJson(x, PhoneDirectory.class);
+        var json = gson.toJson(dir);
+        System.out.println(json);
+
+        var dir2 = gson.fromJson(json, PhoneDirectory.class);
         System.out.println(dir2.getEntries());
     }
 }

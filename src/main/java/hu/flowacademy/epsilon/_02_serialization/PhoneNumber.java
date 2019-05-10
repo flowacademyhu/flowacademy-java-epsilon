@@ -14,7 +14,6 @@ public class PhoneNumber implements Serializable {
     private final String country;
     private final String area;
     private final String number;
-    private final String ext;
 
     private static class SerializationProxy implements Serializable {
         private static final long serialVersionUID = -5995883268115702887L;
@@ -22,13 +21,11 @@ public class PhoneNumber implements Serializable {
         private final String country;
         private final String area;
         private final String number;
-        private final String ext;
 
         SerializationProxy(PhoneNumber n) {
             this.country = n.country;
             this.area = n.area;
             this.number = n.number;
-            this.ext = "";
         }
 
         private Object readResolve() throws ObjectStreamException {
@@ -40,7 +37,18 @@ public class PhoneNumber implements Serializable {
         this.country = checkNumber(country);
         this.area = checkNumber(area);
         this.number = checkNumber(number);
-        this.ext = "";
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public String getArea() {
+        return area;
+    }
+
+    public String getNumber() {
+        return number;
     }
 
     private static String checkNumber(String n) {

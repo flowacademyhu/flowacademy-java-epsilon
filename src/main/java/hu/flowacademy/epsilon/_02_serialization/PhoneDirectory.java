@@ -36,7 +36,7 @@ public class PhoneDirectory implements Serializable {
             .collect(Collectors.toSet());
     }
 
-    protected Map<String, Set<PhoneNumber>> getEntries() {
+    public Map<String, Set<PhoneNumber>> getEntries() {
         return Collections.unmodifiableMap(dir);
     }
 }

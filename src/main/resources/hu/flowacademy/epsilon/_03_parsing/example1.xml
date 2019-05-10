@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<people>
+  <!-- ez egy komment -->
+  <person firstName="Mark"     lastName="Hamill"   birthDate="1951"/>
+  megengedi hogy legyen szöveg a tartalomban
+  <person firstName="Harrison" lastName="Ford"     birthDate="1942"/>
+  <person firstName="Carrie"   lastName="Fisher"   birthDate="1956">
+    <person firstName="Alec"     lastName="Guinness" birthDate="1914"/>
+    <person firstName="Anthony"  lastName="Daniels"  birthDate="1946"/>
+  </person>
+  <person firstName="Kenny"    lastName="Baker"    birthDate="1934"/>
+  <person firstName="Peter"    lastName="Mayhew"   birthDate="1944"/>
+  <person firstName="David"    lastName="Prowse"   birthDate="1935"/>
+</people>
