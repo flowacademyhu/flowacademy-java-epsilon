@@ -5,7 +5,7 @@ import java.lang.reflect.Field;
 public class ReflectionExample {
     public static void main(String[] args) throws Exception {
         Object p = new PhoneNumber("36", "30", "26567874");
-        Class<?> clazz = p.getClass();
+        Class<?> clazz = PhoneNumber.class;
         Field numberField = clazz.getDeclaredField("number");
         numberField.setAccessible(true);
         numberField.set(p, "abrakadabra");

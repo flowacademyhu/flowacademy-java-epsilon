@@ -46,6 +46,7 @@ public class PhoneDirectoryExample {
             System.out.println(dir.reverseLookup(new PhoneNumber("36", "30", "1234567")));
             System.out.println(dir.getEntries().toString());
         }
+        new Exception().printStackTrace();
     }
 
     public static void main(String[] args) throws Exception {
