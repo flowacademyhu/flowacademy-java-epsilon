@@ -1,24 +1,31 @@
 package hu.flowacademy.epsilon._04_concurrency;
 
-import java.util.Random;
+import java.util.Arrays;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.LongAdder;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
-public class BankTransfers {
+public class BankTransfersWithLocks {
     private static final class BankAccount {
         int amount;
+        final Lock lock = new ReentrantLock();
+
+        int getAmount() {
+            return amount;
+        }
     }
 
-    private static final int ACCOUNTS = 10000;
+    private static final int ACCOUNTS = 100;
     private static final int INITIAL_AMOUNT = 1000;
 
     private final LongAdder transferCount = new LongAdder();
 
     private final BankAccount[] accounts;
 
-    BankTransfers(int accountNum, int initialAmount) {
+    BankTransfersWithLocks(int accountNum, int initialAmount) {
         accounts = new BankAccount[accountNum];
         for (int i = 0; i < accounts.length; ++i) {
             accounts[i] = new BankAccount();
@@ -29,7 +36,7 @@ public class BankTransfers {
     public static void main(String[] args) throws InterruptedException {
         var parallelism = Runtime.getRuntime().availableProcessors();
         var exec = Executors.newScheduledThreadPool(parallelism + 1);
-        var transfers = new BankTransfers(ACCOUNTS, INITIAL_AMOUNT);
+        var transfers = new BankTransfersWithLocks(ACCOUNTS, INITIAL_AMOUNT);
         for (int i = 0; i < parallelism; ++i) {
             exec.execute(transfers::simulateTransfers);
         }
@@ -39,23 +46,22 @@ public class BankTransfers {
     }
 
     private void printStats() {
-        try {
-            var t1 = System.nanoTime();
-            var sum = sumAccounts(0);
-            var t2 = System.nanoTime() - t1;
-            System.out.println(sum + "\t" + transferCount.longValue() + "\t" + t2);
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
+        var t1 = System.nanoTime();
+        var sum = sumAccounts(0);
+        var t2 = System.nanoTime() - t1;
+        System.out.println(sum + "\t" + transferCount.longValue() + "\t" + t2);
     }
 
     private int sumAccounts(int from) {
-        if (from >= accounts.length) {
-            return 0;
+        for (BankAccount acc: accounts) {
+            acc.lock.lock();
         }
-        var acc = accounts[from];
-        synchronized (acc) {
-            return acc.amount + sumAccounts(from + 1);
+        try {
+            return Arrays.stream(accounts).mapToInt(BankAccount::getAmount).sum();
+        } finally {
+            for (BankAccount acc: accounts) {
+                acc.lock.unlock();
+            }
         }
     }
 
@@ -67,14 +73,22 @@ public class BankTransfers {
             var accDebit = accounts[idxDebit];
             var idxCredit = rnd.nextInt(accounts.length);
             var accCredit = accounts[idxCredit];
-            synchronized (accounts[Math.min(idxDebit, idxCredit)]) {
-                synchronized (accounts[Math.max(idxDebit, idxCredit)]) {
+            var a1 = accounts[Math.min(idxDebit, idxCredit)];
+            a1.lock.lock();
+            try {
+                var a2 = accounts[Math.max(idxDebit, idxCredit)];
+                a2.lock.lock();
+                try {
                     if (accDebit.amount > 0) {
                         var transferAmount = rnd.nextInt(accDebit.amount) + 1;
                         accDebit.amount -= transferAmount;
                         accCredit.amount += transferAmount;
                     }
+                } finally {
+                    a2.lock.unlock();
                 }
+            } finally {
+              a1.lock.unlock();
             }
             transferCount.increment();
         }
