@@ -12,27 +12,18 @@ import java.util.function.UnaryOperator;
 // airport runway, not allowing two flights to land too close in time to each
 // other.
 public class Runway {
-    private final SortedMap<Integer, String> arrivals = new TreeMap<>();
+    private final TreeMap<Integer, String> arrivals = new TreeMap<>();
     private final int safetyInterval;
 
     public Runway(int safetyInterval) {
         this.safetyInterval = safetyInterval;
     }
 
-    private Optional<Integer> key(UnaryOperator<SortedMap<Integer, String>> op, Function<SortedMap<Integer, String>, Integer> fn) {
-        var opmap = op.apply(arrivals);
-        if (opmap.isEmpty()) {
-            return Optional.empty();
-        } else {
-            return Optional.of(fn.apply(opmap));
-        }
-    }
-
     public boolean tryToLand(int when, String flightName) {
-        var prev = key(m -> m.headMap(when), SortedMap::lastKey);
-        var next = key(m -> m.tailMap(when), SortedMap::firstKey);
-        if (prev.map(p -> when - p >= safetyInterval).orElse(true) &&
-            next.map(n -> n - when >= safetyInterval).orElse(true)) {
+        var prev = arrivals.floorKey(when);
+        var next = arrivals.ceilingKey(when);
+        if ((prev == null || when - prev >= safetyInterval) &&
+            (next == null || next - when >= safetyInterval)) {
             arrivals.put(when, flightName);
             return true;
         } else {

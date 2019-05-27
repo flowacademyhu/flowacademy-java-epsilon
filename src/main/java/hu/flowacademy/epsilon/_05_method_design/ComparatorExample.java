@@ -4,7 +4,7 @@ import java.util.*;
 
 public class ComparatorExample {
     // Most of the time, don't write your own comparator. Use factory methods in
-    // Comparator interface. Here's a null-tolerant reverse natural ordering for Integers.
+    // Comparator interface. Here's a null-tolerant natural ordering for Integers.
     // NOTE: "natural ordering" means that it order instances of classes implementing
     // Comparable interface using their Comparable.compareTo() implementation.
     // NOTE: most comparators can't compare nulls. That's why Comparator.nullsLast and
@@ -12,10 +12,10 @@ public class ComparatorExample {
     // ordering strategy for null.
     // Look into the {@link Period} class for further examples of comparators.
     private static final Comparator<Integer> INTEGER_COMPARATOR =
-            Collections.reverseOrder(Comparator.nullsLast(Comparator.naturalOrder()));
+            Comparator.nullsLast(Comparator.naturalOrder());
 
     public static void main(String[] args) {
-        // Here we can order these Integers in a reverse-natural order, and also have nulls
+        // Here we can order these Integers in a natural order, and also have nulls
         // sorted appropriately.
         var a = new ArrayList<>(List.of(95, 13, 42, 4));
         a.add(null);
