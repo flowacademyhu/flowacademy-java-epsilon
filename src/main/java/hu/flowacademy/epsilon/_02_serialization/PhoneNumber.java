@@ -8,7 +8,7 @@ import java.io.Serializable;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-public class PhoneNumber implements Serializable {
+public class PhoneNumber implements Comparable<PhoneNumber>, Serializable {
     private static final Pattern DIGITS_ONLY = Pattern.compile("^\\d+$");
 
     private final String country;
@@ -84,6 +84,18 @@ public class PhoneNumber implements Serializable {
 
     private void readObject(ObjectInputStream in) throws IOException {
         throw new InvalidObjectException("");
+    }
+
+    @Override public int compareTo(PhoneNumber o) {
+        int cc = country.compareTo(o.country);
+        if (cc != 0) {
+            return cc;
+        }
+        int ca = area.compareTo(o.area);
+        if (ca != 0) {
+            return ca;
+        }
+        return number.compareTo(o.number);
     }
 }
 
