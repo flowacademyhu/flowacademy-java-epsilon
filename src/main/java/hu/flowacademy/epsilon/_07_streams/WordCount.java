@@ -11,7 +11,7 @@ import static java.util.stream.Collectors.*;
 
 /**
  * A fairly complete example that takes a file name from args[0] and finds the
- * 30 most frequently occuring words in the file.
+ * 30 most frequently occurring words in the file.
  */
 public class WordCount {
     public static List<String> mostFrequentWords(File f, int limit) throws FileNotFoundException {
