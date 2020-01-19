@@ -23,14 +23,36 @@ public class FunctionsExample {
         }
     }
 
-    public static void main(String[] args) {
-        System.out.println(TRICE_SQUARED.applyAsInt(10));
-        System.out.println(SQUARED_TRICE.applyAsInt(10));
+    // Here's an interface we declared ourselves that's similar to Function
+    public interface MyFunction<T, R> {
+        R foo(T x);
+    }
 
+    private static Date now() {
+        System.out.println("now invoked");
+        return new Date();
+    }
+
+    // Here's a method that uses our special MyFunction
+    public static <T, R> R useMyFunction(MyFunction<T, R> f, T x) {
+        return f.foo(x);
+    }
+
+    public static void main(String[] args) {
+        // Here we can see how our own interface can also be defined
+        // with a method reference. It could also be defined with a lambda.
+        var x = useMyFunction(String::toUpperCase, "abrakadabra");
+        System.out.println("Using our own MyFunction to uppercase a string: " + x);
+
+        // Test out various compositions:
+        System.out.println("TRICE_SQUARED(10): " + TRICE_SQUARED.applyAsInt(10));
+        System.out.println("SQUARED_TRICE(10): " + SQUARED_TRICE.applyAsInt(10));
+
+        // LogDebug is taking a supplier; new Date() is only evaluated when needed.
         for (int i = 0; i < 200; ++i) {
             // Only effective finals
             final int j = i;
-            logDebug(() -> "Started up at " + new Date() + " " + j);
+            logDebug(() -> "Started up at " + now() + " " + j);
         }
     }
 }
