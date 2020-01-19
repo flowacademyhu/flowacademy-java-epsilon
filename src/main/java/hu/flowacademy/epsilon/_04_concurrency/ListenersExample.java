@@ -45,36 +45,36 @@ public class ListenersExample {
     // we aren't even using multithreading here at all! All we needed for this
     // to happen is to try to modify the listener list while an event was being
     // processed by the listeners.
-    private static void example(Listeners<String> listeners) {
-        listeners.addListener(new Consumer<String>() {
+    private static void example(Listeners<String> foodStall) {
+        foodStall.addListener(new Consumer<String>() {
             @Override public void accept(String event) {
                 if (event.equals("cake")) {
                     System.out.println("I got my cake, thank you!");
                     // This will cause trouble with a non-concurrent
                     // List implementation.
-                    listeners.removeListener(this);
+                    foodStall.removeListener(this);
                 }
             }
         });
 
-        listeners.addListener(event -> {
+        foodStall.addListener(event -> {
             if (event.equals("drink")) {
                 System.out.println("glug, glug");
             }
         });
 
-        listeners.addListener(event -> {
+        foodStall.addListener(event -> {
             if (event.equals("porridge")) {
                 System.out.println("I really don't like this");
             }
         });
 
-        listeners.fireEvent("soup");
-        listeners.fireEvent("drink");
-        listeners.fireEvent("cake");
-        listeners.fireEvent("drink");
-        listeners.fireEvent("cake");
-        listeners.fireEvent("porridge");
+        foodStall.fireEvent("soup");
+        foodStall.fireEvent("drink");
+        foodStall.fireEvent("cake");
+        foodStall.fireEvent("drink");
+        foodStall.fireEvent("cake");
+        foodStall.fireEvent("porridge");
     }
 
     public static void main(String[] args) {
