@@ -95,9 +95,23 @@ public class ConcurrentCollections {
     // key was absent, and also LongAdder can allow multiple concurrent updates.
     // This variant is included to show that even with a non-concurrent class as
     // the value (Integer vs. LongAdder) this strategy still works.
-    private static final void populateMapCompute(Map<Integer, Integer> map) {
+    private static void populateMapMerge(Map<Integer, Integer> map) {
         var key = ThreadLocalRandom.current().nextInt(1000);
+
         map.merge(key, 1, Integer::sum);
+
+/*
+        merge() is similar to compute(), but compute() is more generic. The same example
+        rewritten with compute() would look like this:
+
+        map.compute(key, (k, v) -> {
+            if (v == null) {
+                return 1;
+            } else {
+                return v + 1;
+            }
+        });
+*/
     }
 
     private static final long summarizeValues(Map<Integer, LongAdder> map) {
@@ -143,13 +157,13 @@ public class ConcurrentCollections {
         var map5 = new ConcurrentHashMap<Integer, LongAdder>();
         run(concurrency, () -> populateMap(map5), () -> summarizeValues(map5));
 
-        // Using ConcurrentHashMap with compute() works with Integer keys too and not
+        // Using ConcurrentHashMap with merge() works with Integer keys too and not
         // just with LongAdder. This variant shows that atomicity of compute() protects
         // correctness even if the class of the values (Integer) is itself not
         // concurrency-aware. However, the previous example (map5) is the fastest in a
         // concurrent environment.
         var map6 = new ConcurrentHashMap<Integer, Integer>();
-        run(concurrency, () -> populateMapCompute(map6), () -> summarizeValues2(map6));
+        run(concurrency, () -> populateMapMerge(map6), () -> summarizeValues2(map6));
 
         executorService.shutdown();
     }
