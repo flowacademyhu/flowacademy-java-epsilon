@@ -1,19 +1,18 @@
 package hu.flowacademy.epsilon._01_collections;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class CollectionExamples {
     public static void arrayListTraversalWithIterator() {
-        var l = new ArrayList<String>();
-        l.add("a");
-        l.add("b");
-        l.add("c");
+        // List.of is immutable, but we want to mutate it therefore we
+        // construct a mutable ArrayList as its copy.
+        var l = new ArrayList<>(List.of("a", "b", "c"));
 
         // We can traverse the list with an iterator, using hasNext/next.
         // This is the same as walking it with "for(String s: l) { ... }"
@@ -21,39 +20,53 @@ public class CollectionExamples {
         // to edit the list as you traverse it.
         for (ListIterator<String> it = l.listIterator(); it.hasNext();) {
             String s = it.next();
-            System.err.println(s);
+            if (s.equals("c")) {
+                it.set("C");
+            } else if (s.equals("b")) {
+                it.add("Z");
+            }
+            System.out.println(s);
         }
+        System.out.println(l);
     }
 
     public static void arrayListBackwardsTraversal() {
-        var l = new ArrayList<String>();
-        l.add("a");
-        l.add("b");
-        l.add("c");
+        var l = List.of("a", "b", "c");
 
         // We can walk the list backwards with listIterator. Note we initialize
         // the iterator with l.size() to start at the end, and then use hasPrevious/previous
         for (ListIterator<String> it = l.listIterator(l.size()); it.hasPrevious();) {
             String s = it.previous();
-            System.err.println(s);
+            System.out.println(s);
         }
     }
 
     public static void arrayListTraversalWithForEach() {
-        var l = new ArrayList<String>();
-        l.add("a");
-        l.add("b");
-        l.add("c");
-
-        l.forEach(s -> System.err.println(s));
+        var l = List.of("a", "b", "c");
 
         // NOTE that x -> obj.method(x) lambdas can be replaced with
         // METHOD REFERENCES: obj::method
-        l.forEach(System.err::println);
+        l.forEach(System.out::println);
+
+        // The above method reference is a more compact representation of this lambda:
+        l.forEach(s -> System.out.println(s));
+
+        // The above lambda is a more compact representation of this anonymous inner class:
+        l.forEach(new Consumer<>() {
+            @Override public void accept(String s) {
+                System.out.println(s);
+            }
+        });
+
+        // All three are functionally equivalent.
     }
 
     public static void linkedHashMapsPreserveInsertionOrder() {
-        var m = new LinkedHashMap<String, String>();
+        var m = new LinkedHashMap<String, String>(16, .75f, true) {
+            @Override protected boolean removeEldestEntry(Map.Entry<String, String> eldest) {
+                return size() > 5;
+            }
+        };
         m.put("z", "X");
         m.put("abcdef", "XXXXX");
         m.put("x", "X");
@@ -64,25 +77,25 @@ public class CollectionExamples {
         // keys in exactly the same order we put them in. With an ordinary
         // HashMap you don't have that guarantee.
         for(String k: m.keySet()) {
-            System.err.println(k);
+            System.out.println(k);
         }
         // or:
-        m.keySet().forEach(k -> System.err.println(k));
+        m.keySet().forEach(k -> System.out.println(k));
         // or:
-        m.keySet().forEach(System.err::println);
+        m.keySet().forEach(System.out::println);
 
         // Traverse values only with values(). Again, insertion order is preserved.
         for(String v: m.values()) {
-            System.err.println(v);
+            System.out.println(v);
         }
 
         // Traverse keys and values with entrySet(). Again, insertion order is preserved.
         for(Map.Entry<String, String> e: m.entrySet()) {
-            System.err.println(e.getKey() + " -> " + e.getValue());
+            System.out.println(e.getKey() + " -> " + e.getValue());
         }
         // This one looks different with a lambda, note lambda takes two
         // parameters.
-        m.forEach((k, v) -> System.err.println(k + " -> " + v));
+        m.forEach((k, v) -> System.out.println(k + " -> " + v));
 
         // The reason this lambda takes two parameters is that forEach takes
         // BiConsumer as its parameter, which as its name suggests consumes
@@ -90,13 +103,42 @@ public class CollectionExamples {
         // this is just illustrative):
         m.forEach(new BiConsumer<String, String>() {
             @Override public void accept(String k, String v) {
-                System.err.println(k + " -> " + v);
+                System.out.println(k + " -> " + v);
             }
         });
+    }
 
-        // Not pictured, but remember you can subclass LinkedHashMap and
-        // provide an implementation of its removeEldestEntry() method to
-        // implement size-limited Most Recently Used caches.
+    public static void linkedHashMapsCanProvideMostRecentlyUsedCaches() {
+        // A Most Recently Used (MRU) cache is a temporary storage that has a
+        // bounded size and throws away least-recently used entries to make space
+        // for new entries when it reaches its maximum size.
+        // LinkedHashMap can be used to provide a MRU cache by subclassing it and
+        // overriding its removeEldestEntry method:
+        var m = new LinkedHashMap<String, String>(16, .75f, true) {
+            @Override protected boolean removeEldestEntry(Map.Entry<String, String> eldest) {
+                return size() > 5;
+            }
+        };
+
+        m.put("z", "X");
+        m.put("abcdef", "XXXXX");
+        m.put("x", "X");
+        m.put("xyzzy", "asdf");
+        m.put("y", "Y");
+
+        // Print all entries
+        m.forEach((k, v) -> System.out.println(k + " -> " + v));
+
+        // Get "z" so it'll become recently used:
+        m.get("z");
+
+        // Add a new entry:
+        m.put("woo", "Hoo");
+
+        System.out.println();
+        // Print all entries again; we see "abcdef" was removed.
+        m.forEach((k, v) -> System.out.println(k + " -> " + v));
+
     }
 
     public static void runway() {
@@ -114,6 +156,12 @@ public class CollectionExamples {
         // Let's print the arrivals:
         System.out.println("Time:\tFlight:");
         runway.getArrivals().forEach((when, flight) -> System.out.println(when + "\t" + flight));
+
+        // Let's only print arrivals between minutes 11 (inclusive) and 15 (exclusive),
+        // that is for `m` values where `11 <= m < 15`. Note tailMap is inclusive and
+        // headMap is exclusive. This illustrates how a sorted map can be used for
+        // range filtering.
+        runway.getArrivals().tailMap(11).headMap(15).forEach((when, flight) -> System.out.println(when + "\t" + flight));
     }
 
     public static void mapOfMaps() {
@@ -131,6 +179,8 @@ public class CollectionExamples {
         arrayListBackwardsTraversal();
         arrayListTraversalWithForEach();
         linkedHashMapsPreserveInsertionOrder();
+        linkedHashMapsCanProvideMostRecentlyUsedCaches();
         runway();
+        mapOfMaps();
     }
 }
