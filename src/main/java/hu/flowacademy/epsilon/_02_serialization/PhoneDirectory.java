@@ -39,4 +39,15 @@ public class PhoneDirectory implements Serializable {
     public Map<String, Set<PhoneNumber>> getEntries() {
         return Collections.unmodifiableMap(dir);
     }
+
+    @Override public boolean equals(Object obj) {
+        if (obj instanceof PhoneDirectory) {
+            return ((PhoneDirectory)obj).dir.equals(dir);
+        }
+        return false;
+    }
+
+    @Override public int hashCode() {
+        return dir.hashCode();
+    }
 }
