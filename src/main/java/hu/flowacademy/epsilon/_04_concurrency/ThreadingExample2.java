@@ -1,8 +1,10 @@
 package hu.flowacademy.epsilon._04_concurrency;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Supplier;
@@ -81,7 +83,8 @@ public class ThreadingExample2 {
         }
     }
 
-    // Uses an executor service to run tasks in parallel, and uses wait/notify to coordinate start
+    // Uses an executor service to run tasks in parallel, and uses wait/notify to
+    // coordinate starting and ending.
     private static void runWithExecServiceAndWaitNotify(int taskCount, Runnable r, Supplier<Object> value) throws InterruptedException {
         Coordination coord = new Coordination(taskCount);
 
@@ -109,7 +112,9 @@ public class ThreadingExample2 {
         System.out.println((t2 - t1) + "\t" + value.get());
     }
 
-    // Uses an executor service to run tasks in parallel
+    // Uses an executor service to run tasks in parallel, and uses few countdown
+    // latches to coordinate starting and ending. This is the preferred modern
+    // approach.
     private static void runWithExecServiceAndLatch(int taskCount, Runnable r, Supplier<Object> value) throws InterruptedException {
         CountDownLatch ready = new CountDownLatch(taskCount);
         CountDownLatch go = new CountDownLatch(1);
@@ -136,6 +141,28 @@ public class ThreadingExample2 {
         long t1 = System.nanoTime();
         go.countDown();
         done.await();
+        long t2 = System.nanoTime();
+        System.out.println((t2 - t1) + "\t" + value.get());
+    }
+
+    // Uses an executor service to run tasks in parallel, and uses Future.get to
+    // coordinate ending. Note this is less precise than either runWithExecServiceAndLatch
+    // or runWithExecServiceAndWaitNotify because it can't coordinate starting the tasks.
+    private static void runWithExecServiceAndFuture(int threadCount, Runnable r, Supplier<Object> value) throws InterruptedException {
+        Future<?>[] fs = new Future<?>[threadCount];
+        long t1 = System.nanoTime();
+        for (int i = 0; i < threadCount; ++i) {
+            fs[i] = executorService.submit(r);
+        }
+
+        for(var f: fs) {
+            try {
+                f.get();
+            } catch (ExecutionException e) {
+                ;
+            }
+        }
+
         long t2 = System.nanoTime();
         System.out.println((t2 - t1) + "\t" + value.get());
     }
