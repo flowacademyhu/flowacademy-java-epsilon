@@ -20,6 +20,19 @@ public class Department {
         this.employees = List.copyOf(employees);
     }
 
+    // How do you make a mutator method on an immutable object? You don't, really.
+    // Best you can do is a method that returns a different immutable object,
+    // representing the desired change. This is the same strategy that e.g.
+    // String.substring or String.replace employ.
+    public Department removeEmployee(Employee e) {
+        var newEmployees = new ArrayList<>(employees);
+        if (newEmployees.remove(e)) {
+            return new Department(newEmployees);
+        } else {
+            return this;
+        }
+    }
+
     public List<Employee> getEmployees() {
         // NOTE: we aren't making a copy, because List.copyOf created an
         // immutable copy for us already. You can freely hand it out, because
