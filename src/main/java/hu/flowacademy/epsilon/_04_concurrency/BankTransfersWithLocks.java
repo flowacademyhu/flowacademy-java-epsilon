@@ -71,7 +71,9 @@ public class BankTransfersWithLocks {
         }
         try {
             // Now sum it, using stream API
-            return Arrays.stream(accounts).mapToInt(BankAccount::getAmount).sum();
+            return Arrays.stream(accounts)
+                .mapToInt(BankAccount::getAmount)
+                .sum();
         } finally {
             // Finally, unlock them all again. It doesn't actually matter in
             // what order we unlock them, but using a for loop just provides
@@ -100,7 +102,7 @@ public class BankTransfersWithLocks {
                 var a2 = accounts[Math.max(idxDebit, idxCredit)];
                 a2.lock.lock();
                 try {
-                    if (accDebit.amount > 0) {
+                    if (accDebit.getAmount() > 0) {
                         var transferAmount = rnd.nextInt(accDebit.amount) + 1;
                         accDebit.amount -= transferAmount;
                         accCredit.amount += transferAmount;
