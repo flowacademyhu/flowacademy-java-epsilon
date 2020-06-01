@@ -37,24 +37,24 @@ public class ThreadingExample2 {
     }
 
     private static final class Coordination {
-        private int ready;
+        private int notYetReady;
         private boolean go;
-        private int done;
+        private int notYetDone;
 
         Coordination(int tasks) {
-            ready = tasks;
+            notYetReady = tasks;
             go = false;
-            done = tasks;
+            notYetDone = tasks;
         }
 
         synchronized void markReady() {
-            if (--ready == 0) {
+            if (--notYetReady == 0) {
                 notifyAll();
             }
         }
 
         synchronized void waitReady() throws InterruptedException {
-            while (ready > 0) {
+            while (notYetReady > 0) {
                 wait();
             }
         }
@@ -71,13 +71,13 @@ public class ThreadingExample2 {
         }
 
         synchronized void markDone() {
-            if (--done == 0) {
+            if (--notYetDone == 0) {
                 notifyAll();
             }
         }
 
         synchronized void waitDone() throws InterruptedException {
-            while (done > 0) {
+            while (notYetDone > 0) {
                 wait();
             }
         }
