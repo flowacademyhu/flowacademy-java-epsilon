@@ -148,7 +148,7 @@ public class BankTransfers {
         var accCredit = accounts[idxCredit];
         synchronized (accDebit) {
             synchronized (accCredit) {
-                doTransferSynchronized(accDebit, accCredit);
+                doTransfer(accDebit, accCredit);
             }
         }
     }
@@ -156,7 +156,7 @@ public class BankTransfers {
     private void simulateTransfersNoDeadlock(int idxDebit, int idxCredit) {
         synchronized (accounts[Math.min(idxDebit, idxCredit)]) {
             synchronized (accounts[Math.max(idxDebit, idxCredit)]) {
-                doTransferSynchronized(accounts[idxDebit], accounts[idxCredit]);
+                doTransfer(accounts[idxDebit], accounts[idxCredit]);
             }
         }
     }
@@ -166,7 +166,7 @@ public class BankTransfers {
      * {@link #simulateTransfersNoDeadlock(int, int)} that performs a transfer of an
      * amount from debit account to credit account once they're both locked.
      */
-    private void doTransferSynchronized(BankAccount accDebit, BankAccount accCredit) {
+    private void doTransfer(BankAccount accDebit, BankAccount accCredit) {
         if (accDebit.amount > 0) {
             var transferAmount = ThreadLocalRandom.current().nextInt(accDebit.amount) + 1;
             accDebit.amount -= transferAmount;
