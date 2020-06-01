@@ -17,10 +17,11 @@ import java.util.function.Supplier;
 // CountdownLatch.
 public class ThreadingExample2 {
     private static final ExecutorService executorService = Executors.newCachedThreadPool();
+    private static final int CONCURRENCY = 10;
 
     // Uses direct thread control to run tasks in parallel
-    private static void runWithThreads(int threadCount, Runnable r, Supplier<Object> value) throws InterruptedException {
-        Thread[] threads = new Thread[threadCount];
+    private static void runWithThreads(Runnable r, Supplier<Object> value) throws InterruptedException {
+        Thread[] threads = new Thread[CONCURRENCY];
         for(int i = 0; i < threads.length; ++i) {
             threads[i] = new Thread(r);
         }
@@ -86,8 +87,8 @@ public class ThreadingExample2 {
 
     // Uses an executor service to run tasks in parallel, and uses wait/notify to
     // coordinate starting and ending.
-    private static void runWithExecServiceAndWaitNotify(int taskCount, Runnable r, Supplier<Object> value) throws InterruptedException {
-        Coordination coord = new Coordination(taskCount);
+    private static void runWithExecServiceAndWaitNotify(Runnable r, Supplier<Object> value) throws InterruptedException {
+        Coordination coord = new Coordination(CONCURRENCY);
 
         Runnable r2 = () -> {
             coord.markReady();
@@ -102,7 +103,7 @@ public class ThreadingExample2 {
                 coord.markDone();
             }
         };
-        for (int i = 0; i < taskCount; ++i) {
+        for (int i = 0; i < CONCURRENCY; ++i) {
             executorService.execute(r2);
         }
         coord.waitReady();
@@ -116,10 +117,10 @@ public class ThreadingExample2 {
     // Uses an executor service to run tasks in parallel, and uses few countdown
     // latches to coordinate starting and ending. This is the preferred modern
     // approach.
-    private static void runWithExecServiceAndLatch(int taskCount, Runnable r, Supplier<Object> value) throws InterruptedException {
-        CountDownLatch ready = new CountDownLatch(taskCount);
+    private static void runWithExecServiceAndLatch(Runnable r, Supplier<Object> value) throws InterruptedException {
+        CountDownLatch ready = new CountDownLatch(CONCURRENCY);
         CountDownLatch go = new CountDownLatch(1);
-        CountDownLatch done = new CountDownLatch(taskCount);
+        CountDownLatch done = new CountDownLatch(CONCURRENCY);
 
         Runnable r2 = () -> {
             ready.countDown();
@@ -134,7 +135,7 @@ public class ThreadingExample2 {
                 done.countDown();
             }
         };
-        for (int i = 0; i < taskCount; ++i) {
+        for (int i = 0; i < CONCURRENCY; ++i) {
             executorService.execute(r2);
         }
 
@@ -149,10 +150,10 @@ public class ThreadingExample2 {
     // Uses an executor service to run tasks in parallel, and uses Future.get to
     // coordinate ending. Note this is less precise than either runWithExecServiceAndLatch
     // or runWithExecServiceAndWaitNotify because it can't coordinate starting the tasks.
-    private static void runWithExecServiceAndFuture(int threadCount, Runnable r, Supplier<Object> value) throws InterruptedException {
-        Future<?>[] fs = new Future<?>[threadCount];
+    private static void runWithExecServiceAndFuture(Runnable r, Supplier<Object> value) throws InterruptedException {
+        Future<?>[] fs = new Future<?>[CONCURRENCY];
         long t1 = System.nanoTime();
-        for (int i = 0; i < threadCount; ++i) {
+        for (int i = 0; i < CONCURRENCY; ++i) {
             fs[i] = executorService.submit(r);
         }
 
@@ -177,8 +178,8 @@ public class ThreadingExample2 {
         };
     }
 
-    private static void run(int taskCount, Runnable r, Supplier<Object> value) throws InterruptedException {
-        runWithExecServiceAndLatch(taskCount, doManyTimes(r), value);
+    private static void run(Runnable r, Supplier<Object> value) throws InterruptedException {
+        runWithThreads(doManyTimes(r), value);
     }
 
     private static final class MutableInt {
@@ -200,7 +201,7 @@ public class ThreadingExample2 {
     }
 
     public static void main(String[] args) throws Exception {
-        run(10, () -> {}, () -> 0); // noop, warmup
+        run(() -> {}, () -> 0); // noop, warmup
 
         // This example shows you how concurrent execution is much harder to write
         // correctly than a single-threaded execution. We start 10 threads, each of
@@ -217,26 +218,27 @@ public class ThreadingExample2 {
         // indefinitely, and there is no requirement that every thread writes it back all
         // the way to main RAM all the time.
         MutableInt mi1 = new MutableInt();
-        run(10, mi1::increment, mi1::get);
+        run(mi1::increment, mi1::get);
 
         // This example shows that synchronizing produces correct results. We synchronize on each
         // iteration of the loop. We can see this is VERY costly. This is by far the slowest
         // example of them all.
         MutableInt mi2 = new MutableInt();
-        run(10, mi2::syncedIncrement, mi2::get);
+        run(mi2::syncedIncrement, mi2::get);
 
         // This example shows that we can often avoid synchronization using java.util.concurrent.Atomic* classes.
         AtomicInteger atomicInt = new AtomicInteger();
-        run(10, atomicInt::incrementAndGet, atomicInt::get);
 
-        // This example shows that we can get even better performance using LongAdder. (See also LongAccumulator.)
+        run(atomicInt::incrementAndGet, atomicInt::get);
+
+        // This example shows that we can get even better performance using LongAdder.
         LongAdder longAdder = new LongAdder();
-        run(10, longAdder::increment, longAdder::longValue);
+        run(longAdder::increment, longAdder::longValue);
 
         // This example shows LongAccumulator, which is a generalization of LongAdder and can be
         // used with any associative operation, not just sum (we're still using it with sum here.)
         LongAccumulator longAccumulator = new LongAccumulator(Long::sum, 0L);
-        run(10, () -> longAccumulator.accumulate(1), longAccumulator::longValue);
+        run(() -> longAccumulator.accumulate(1), longAccumulator::longValue);
 
         executorService.shutdown();
     }
