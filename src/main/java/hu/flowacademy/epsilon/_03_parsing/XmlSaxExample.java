@@ -2,6 +2,7 @@ package hu.flowacademy.epsilon._03_parsing;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -31,7 +32,7 @@ public class XmlSaxExample {
                 var age = 1977 - Integer.parseInt(attributes.getValue("birthDate"));
                 // By performing filtering already in the handler, we don't even construct
                 // those objects that wouldn't match the filter. When working with large
-                // datasets, moving processing into the handler and only keeping the minumum
+                // datasets, moving processing into the handler and only keeping the minimum
                 // required data there can significantly reduce the amount of memory needed to
                 // run the processing.
                 if (age > minAge) {
@@ -46,7 +47,7 @@ public class XmlSaxExample {
     }
 
     public static void loadXml() throws Exception {
-        var parser = SAXParserFactory.newDefaultInstance().newSAXParser();
+        SAXParser parser = SAXParserFactory.newDefaultInstance().newSAXParser();
         try (var in = XmlSaxExample.class.getResourceAsStream("example1.xml")) {
             var handler = new PeopleHandler(30);
             // You need to pass your handler to the parser. The handler needs to
