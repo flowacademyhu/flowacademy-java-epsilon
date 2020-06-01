@@ -1,12 +1,8 @@
 package hu.flowacademy.epsilon._01_collections;
 
-import com.google.common.base.Function;
 import java.util.Collections;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.function.UnaryOperator;
 
 // Demonstrates one possible use of a sorted map. Simulates scheduling of an
 // airport runway, not allowing two flights to land too close in time to each
