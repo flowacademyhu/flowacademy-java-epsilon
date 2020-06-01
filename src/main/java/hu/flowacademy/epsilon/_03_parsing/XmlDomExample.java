@@ -2,7 +2,6 @@ package hu.flowacademy.epsilon._03_parsing;
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -25,8 +24,13 @@ public class XmlDomExample {
     public static void loadXml() throws Exception {
         // You can create instances with different configurations, but defaults are
         // almost always sufficient.
-        DocumentBuilder docBuilder = DocumentBuilderFactory.newDefaultInstance().newDocumentBuilder();
-        try (InputStream in = XmlDomExample.class.getResourceAsStream("example1.xml")) {
+        DocumentBuilderFactory docBuilderF = DocumentBuilderFactory.newDefaultInstance();
+
+        DocumentBuilder docBuilder = docBuilderF.newDocumentBuilder();
+
+        Class<XmlDomExample> myClass = XmlDomExample.class;
+
+        try (InputStream in = myClass.getResourceAsStream("example1.xml")) {
             Document doc = docBuilder.parse(in);
             Element people = doc.getDocumentElement();
 
@@ -50,7 +54,7 @@ public class XmlDomExample {
                         1977 - Integer.parseInt(e.getAttribute("birthDate"))
                     );
                 })
-                .filter(o -> o.age > 30);
+                .filter(p -> p.age > 30);
 
             x.forEach(o -> System.out.println(String.format("%s %s", o.firstName, o.lastName)));
 
