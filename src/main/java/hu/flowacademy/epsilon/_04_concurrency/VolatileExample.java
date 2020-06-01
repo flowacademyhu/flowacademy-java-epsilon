@@ -8,7 +8,7 @@ public class VolatileExample {
         new VolatileExample().run();
     }
 
-    public void loop(){
+    public void loop() {
         while(!stop) {
             i += 1;
         }
