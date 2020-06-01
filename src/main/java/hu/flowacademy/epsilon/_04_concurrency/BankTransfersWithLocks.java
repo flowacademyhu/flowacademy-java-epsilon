@@ -58,12 +58,12 @@ public class BankTransfersWithLocks {
 
     private void printStats() {
         var t1 = System.nanoTime();
-        var sum = sumAccounts(0);
+        var sum = sumAccounts();
         var t2 = System.nanoTime() - t1;
         System.out.println(sum + "\t" + transferCount.longValue() + "\t" + t2);
     }
 
-    private int sumAccounts(int from) {
+    private int sumAccounts() {
         // First, lock all accounts in the array from smaller indices to larger
         // ones. (A for loop over an array will always run from 0 to length-1.)
         for (BankAccount acc: accounts) {
