@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.LongAccumulator;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Supplier;
 
@@ -231,6 +232,11 @@ public class ThreadingExample2 {
         // This example shows that we can get even better performance using LongAdder. (See also LongAccumulator.)
         LongAdder longAdder = new LongAdder();
         run(10, longAdder::increment, longAdder::longValue);
+
+        // This example shows LongAccumulator, which is a generalization of LongAdder and can be
+        // used with any associative operation, not just sum (we're still using it with sum here.)
+        LongAccumulator longAccumulator = new LongAccumulator(Long::sum, 0L);
+        run(10, () -> longAccumulator.accumulate(1), longAccumulator::longValue);
 
         executorService.shutdown();
     }
