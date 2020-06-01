@@ -76,6 +76,14 @@ public class BankTransfers {
         }
     }
 
+    private int sumAccountsNoSync() {
+        var sum = 0;
+        for (var acc: accounts) {
+            sum += acc.amount;
+        }
+        return sum;
+    }
+
     /**
      * This method summarizes accounts locking them one by one. While it
      * traverses the elements of the @{link #accounts} array, transactions
@@ -136,6 +144,12 @@ public class BankTransfers {
             transfer.accept(idxDebit, idxCredit);
             transferCount.increment();
         }
+    }
+
+    private void simulateTransfersNoSync(int idxDebit, int idxCredit) {
+        var accDebit = accounts[idxDebit];
+        var accCredit = accounts[idxCredit];
+        doTransfer(accDebit, accCredit);
     }
 
     // This strategy always first locks the debit account and then the credit
