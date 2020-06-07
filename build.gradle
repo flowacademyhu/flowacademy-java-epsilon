@@ -31,3 +31,5 @@ dependencies {
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
 }
+
+mainClassName = 'hu.flowacademy.epsilon._01_collections.CollectionsExample'
