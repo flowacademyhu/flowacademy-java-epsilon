@@ -21,19 +21,19 @@ public class SimpleStreamExample {
     }
 
     static final class Fib {
-        final BigInteger m;
-        final BigInteger n;
-        Fib(BigInteger m, BigInteger n) {
-            this.m = m;
-            this.n = n;
+        final BigInteger previous;
+        final BigInteger current;
+        Fib(BigInteger previous, BigInteger current) {
+            this.previous = previous;
+            this.current = current;
         }
 
         Fib next() {
-            return new Fib(n, m.add(n));
+            return new Fib(current, current.add(previous));
         }
 
         BigInteger getValue() {
-            return m;
+            return current;
         }
     }
 
