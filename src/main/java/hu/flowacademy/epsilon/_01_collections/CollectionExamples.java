@@ -157,11 +157,25 @@ public class CollectionExamples {
         System.out.println("Time:\tFlight:");
         runway.getArrivals().forEach((when, flight) -> System.out.println(when + "\t" + flight));
 
-        // Let's only print arrivals between minutes 11 (inclusive) and 15 (exclusive),
-        // that is for `m` values where `11 <= m < 15`. Note tailMap is inclusive and
+        // Let's only print arrivals between minutes 11 (inclusive) and 20 (exclusive),
+        // that is for `m` values where `11 <= m < 20`. Note tailMap is inclusive and
         // headMap is exclusive. This illustrates how a sorted map can be used for
         // range filtering.
-        runway.getArrivals().tailMap(11).headMap(15).forEach((when, flight) -> System.out.println(when + "\t" + flight));
+        var after11 = runway.getArrivals().tailMap(11);
+        var after11Before20 = after11.headMap(20);
+
+        System.out.println("Between 11-20");
+        System.out.println("Time:\tFlight:");
+        after11Before20.forEach((when, flight) -> System.out.println(when + "\t" + flight));
+
+        System.out.println(runway.tryToLand(19, "WV4789"));
+
+        // Note that we're using the same headMap in after11Before20 variable.
+        // It is a live view of the underlying collection.
+        System.out.println("Between 11-20");
+        System.out.println("Time:\tFlight:");
+        after11Before20.forEach((when, flight) -> System.out.println(when + "\t" + flight));
+
     }
 
     public static void mapOfMaps() {
