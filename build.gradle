@@ -12,6 +12,8 @@ plugins {
 
     // Apply the application plugin to add support for building an application
     id 'application'
+
+    id 'maven'
 }
 
 repositories {
@@ -33,3 +35,13 @@ dependencies {
 }
 
 mainClassName = 'hu.flowacademy.epsilon._01_collections.CollectionsExample'
+
+task createPom  {
+    pom {
+        project {
+            groupId 'hu.flowacademy'
+            artifactId 'java-epsilon'
+            version '1.0.0-SNAPSHOT'
+        }
+    }.writeTo("pom.xml")
+}
