@@ -36,6 +36,14 @@ dependencies {
 
 mainClassName = 'hu.flowacademy.epsilon._01_collections.CollectionExamples'
 
+jar {
+    manifest {
+        attributes(
+            'Main-Class': mainClassName
+        )
+    }
+}
+
 task createPom  {
     pom {
         project {
