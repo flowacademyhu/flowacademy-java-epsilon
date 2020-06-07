@@ -34,7 +34,7 @@ dependencies {
     testImplementation 'junit:junit:4.12'
 }
 
-mainClassName = 'hu.flowacademy.epsilon._01_collections.CollectionsExample'
+mainClassName = 'hu.flowacademy.epsilon._01_collections.CollectionExamples'
 
 task createPom  {
     pom {
